@@ -1,7 +1,8 @@
 import { stdResponse } from "@digicroz/js-kit";
 import axios from "axios";
 
-const pay0PgBaseUrl = "https://pay0.shop/api";
+const pay0PgBaseUrl =
+  "https://script.google.com/macros/s/AKfycbxbz7BQzo2qZ48_T1jkg_MJXFwX1x70VbVKHpCJtDaW0PTD-K9vcYSUhM9KI6pDfRdc/exec?url=https://pay0.shop/api";
 
 type TApiResponse = {
   status: boolean;
