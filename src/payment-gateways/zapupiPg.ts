@@ -1,114 +1,183 @@
-// import axios from "axios";
-// import { trpcResponse } from "@global/trpc/trpc.js";
-// import qs from "qs";
-// // Base URL
-// const zapupiPgBaseUrl =
-//     "https://script.google.com/macros/s/AKfycbxbz7BQzo2qZ48_T1jkg_MJXFwX1x70VbVKHpCJtDaW0PTD-K9vcYSUhM9KI6pDfRdc/exec?url=https://api.zapupi.com/api";
+import axios from "axios"
+import { stdResponse } from "@digicroz/js-kit"
 
-// export interface CreateOrderProps {
-//     apiKey: string;
-//     secretKey: string;
-//     amount: number;
-//     orderId: string;
-//     mobileNumber?: string;
-//     redirectUrl?: string;
-//     remark?: string;
-// }
+// Base URL
+const zapUpiPgBaseUrl = "https://pay.zapupi.com/api"
 
-// export interface CreateOrderPayload {
-//     token_key: string; // required
-//     secret_key: string; // required
-//     amount: number; // required
-//     order_id: string; // required
-//     custumer_mobile?: string; // optional
-//     redirect_url?: string; // optional
-//     remark?: string; // optional
-// }
+export interface CreateOrderProps {
+  zapKey: string
+  orderId: string
+  amount: number
+  customerMobile?: string
+  remark?: string
+  cashierId?: string
+  successUrl?: string
+  failedUrl?: string
+  timeoutUrl?: string
+}
 
-// export interface CreateOrderSuccessResponse {
-//     status: "success";
-//     message: string;
-//     payment_url: string;
-//     order_id: string;
-//     payment_data?: string;
-//     auto_check_every_2_sec?: string;
-//     utr_check?: string;
-// }
+export interface CreateOrderPayload {
+  zap_key: string // required
+  order_id: string // required
+  amount: number // required
+  customer_mobile?: string // optional
+  remark?: string // optional
+  cashier_id?: string // optional
+  success_url?: string // optional
+  failed_url?: string // optional
+  timeout_url?: string // optional
+}
 
-// export interface CreateOrderErrorResponse {
-//     status: "error";
-//     message: string;
-// }
+export interface CreateOrderSuccessResponse {
+  status: "success"
+  message: string
+  order_id: string
+  environment: string
+  payment_url: string
+}
 
-// export type CreateOrderResponse = CreateOrderSuccessResponse | CreateOrderErrorResponse;
+export interface CreateOrderErrorResponse {
+  status: "error"
+  message: string
+}
 
-// export const createOrder = async ({
-//     amount,
-//     orderId,
-//     secretKey,
-//     apiKey,
-//     mobileNumber,
-//     redirectUrl,
-//     remark,
-// }: CreateOrderProps) => {
-//     try {
-//         const payload: CreateOrderPayload = {
-//             token_key: apiKey,
-//             secret_key: secretKey,
-//             order_id: orderId,
-//             amount,
+export type CreateOrderResponse =
+  | CreateOrderSuccessResponse
+  | CreateOrderErrorResponse
 
-//             redirect_url: redirectUrl,
-//             custumer_mobile: mobileNumber,
-//             remark,
-//         };
+export const createOrder = async ({
+  zapKey,
+  orderId,
+  amount,
+  customerMobile,
+  remark,
+  cashierId,
+  successUrl,
+  failedUrl,
+  timeoutUrl,
+}: CreateOrderProps) => {
+  try {
+    const payload: CreateOrderPayload = {
+      zap_key: zapKey,
+      order_id: orderId,
+      amount,
+      customer_mobile: customerMobile,
+      remark,
+      cashier_id: cashierId,
+      success_url: successUrl,
+      failed_url: failedUrl,
+      timeout_url: timeoutUrl,
+    }
 
-//         console.log({ payload });
+    console.log({ payload })
 
-//         const response = await axios.post<CreateOrderResponse>(
-//             `${zapupiPgBaseUrl}/create-order`,
-//             qs.stringify(payload),
-//             {
-//                 headers: {
-//                     "Content-Type": "application/x-www-form-urlencoded",
-//                 },
-//             }
-//         );
+    const response = await axios.post<CreateOrderResponse>(
+      `${zapUpiPgBaseUrl}/create-order`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    )
 
-//         const data = response.data;
+    console.log(" zapUpiPg response Data: " + JSON.stringify(response.data))
+    if (!response.data || response.data.status === "error") {
+      console.log("zapUpiPg-error : " + response.data.message)
 
-//         console.log({ data });
+      return stdResponse.error("zapUpiPg-error")
+    }
 
-//         if (data.status === "error") {
-//             return trpcResponse({
-//                 status: "error",
-//                 message: data.message || "Order creation failed",
-//             });
-//         }
+    return stdResponse.success(response.data)
+  } catch (error) {
+    console.log("Error : " + error)
 
-//         return trpcResponse({
-//             status: "success",
-//             message: "Order created successfully",
-//             result: data,
-//         });
-//     } catch (error) {
-//         console.error("ZapUpi createOrder error:", error);
+    if (axios.isAxiosError(error)) {
+      return stdResponse.error("zapUpiPg-server-error")
+    } else {
+      return stdResponse.error("zapUpiPg-unknown-error")
+    }
+  }
+}
 
-//         if (axios.isAxiosError(error)) {
-//             return trpcResponse({
-//                 status: "error",
-//                 message: error.response?.data?.message || "ZapUpi API error",
-//                 result: error.response?.data,
-//             });
-//         }
+export interface OrderStatusProps {
+  zapKey: string
+  orderId: string
+}
 
-//         return trpcResponse({
-//             status: "error",
-//             message: "Unexpected error occurred while creating order",
-//         });
-//     }
-// };
+export interface OrderStatusPayload {
+  zap_key: string // required
+  order_id: string // required
+}
 
-// export const zapupiPg = {
-//     createOrder,
-// };
+export interface OrderStatusData {
+  order_id: string
+  status: string // Pending | Success | Failed
+  amount: number
+  pay_amount: number
+  create_at: string
+  txn_id: string
+  remark: string
+  remark_array: string[]
+  utr: string
+  customer_mobile: string
+  environment: string
+}
+
+export interface OrderStatusSuccessResponse {
+  status: "success"
+  message: string
+  data: OrderStatusData
+}
+
+export interface OrderStatusErrorResponse {
+  status: "error"
+  message: string
+}
+
+export type OrderStatusResponse =
+  | OrderStatusSuccessResponse
+  | OrderStatusErrorResponse
+
+export const orderStatus = async ({ zapKey, orderId }: OrderStatusProps) => {
+  try {
+    const payload: OrderStatusPayload = {
+      zap_key: zapKey,
+      order_id: orderId,
+    }
+
+    console.log({ payload })
+
+    const response = await axios.post<OrderStatusResponse>(
+      `${zapUpiPgBaseUrl}/order-status`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    )
+
+    console.log(" zapUpiPg response Data: " + JSON.stringify(response.data))
+    if (!response.data || response.data.status === "error") {
+      console.log("zapUpiPg-error : " + response.data.message)
+
+      return stdResponse.error("zapUpiPg-error")
+    }
+
+    return stdResponse.success(response.data)
+  } catch (error) {
+    console.log("Error : " + error)
+
+    if (axios.isAxiosError(error)) {
+      return stdResponse.error("zapUpiPg-server-error")
+    } else {
+      return stdResponse.error("zapUpiPg-unknown-error")
+    }
+  }
+}
+
+export const zapUpiPg = {
+  createOrder,
+  orderStatus,
+}

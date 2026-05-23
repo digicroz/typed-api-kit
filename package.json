@@ -64,8 +64,8 @@
     "unlink": "npm unlink -g @digicroz/onesignal"
   },
   "dependencies": {
-    "@digicroz/js-kit": "^1.0.16",
-    "axios": "^1.13.6",
+    "@digicroz/js-kit": "^1.0.17",
+    "axios": "^1.16.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
