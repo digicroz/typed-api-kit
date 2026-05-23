@@ -1,6 +1,6 @@
 {
   "name": "@digicroz/typed-api-kit",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Type-safe OneSignal push notification client for Node.js and TypeScript",
   "keywords": [
     "onesignal",
