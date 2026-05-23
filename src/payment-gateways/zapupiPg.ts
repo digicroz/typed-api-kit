@@ -89,9 +89,13 @@ export const createOrder = async ({
     }
 
     return stdResponse.success(response.data)
-  } catch (error) {
+  } catch (error: unknown) {
     console.log("Error : " + error)
-
+    console.error(error);
+    if (error instanceof Error) {
+      console.error(error.message);
+      console.error(error.stack);
+    }
     if (axios.isAxiosError(error)) {
       return stdResponse.error("zapUpiPg-server-error")
     } else {
