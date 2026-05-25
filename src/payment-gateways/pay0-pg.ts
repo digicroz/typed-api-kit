@@ -2,7 +2,7 @@ import { stdResponse } from "@digicroz/js-kit";
 import axios from "axios";
 
 const pay0PgBaseUrl =
-  "https://script.google.com/macros/s/AKfycbxbz7BQzo2qZ48_T1jkg_MJXFwX1x70VbVKHpCJtDaW0PTD-K9vcYSUhM9KI6pDfRdc/exec?url=https://pay0.shop/api";
+  "https://pay0.shop/api";
 
 type TApiResponse = {
   status: boolean;
@@ -53,6 +53,8 @@ const createOrder = async ({
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
+          'User-Agent': 'curl/8.7.1',
+          Accept: 'application/json',
         },
       },
     );
@@ -72,7 +74,12 @@ const createOrder = async ({
 
     return stdResponse.success(response.data.result);
   } catch (error) {
-    console.log("Error : " + error);
+    console.log("Error : " + error)
+    console.error(error);
+    if (error instanceof Error) {
+      console.error(error.message);
+      console.error(error.stack);
+    }
 
     if (axios.isAxiosError(error)) {
       return stdResponse.error("pay0pg-server-error");

@@ -1,5 +1,5 @@
-import { pay0Pg } from "./pay0Pg"
-import { zapUpiPg } from "./zapupiPg"
+import { pay0Pg } from "./pay0-pg"
+import { zapUpiPg } from "./zapupi-pg"
 
 export const paymentGateways = {
   pay0Pg,
